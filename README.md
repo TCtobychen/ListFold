@@ -2,9 +2,11 @@
 
 Files needed to run the code: `factor_data.npy`, `Y_cl.npy`. 
 
-`factor_data.npy` contains the features needed for A share stocks and can be downloaded from 
+`factor_data.npy` contains the features needed for A share stocks and can be downloaded from https://drive.google.com/file/d/1Jc5o6LdMBkwMMiWSCz8w4MbWjymBM6AE/view?usp=sharing
 
-`Y_cl.npy` contains the corresponding weekly price and can be downloaded from 
+`Y_cl.npy` contains the corresponding weekly price and can be downloaded from https://drive.google.com/file/d/11Gsqm_dbCVm5Npehz83mylKkmxJ_2xR8/view?usp=sharing
+
+For test run, put these two files under main directory. 
 
 ### Flowchart
 
@@ -26,7 +28,7 @@ Files needed to run the code: `factor_data.npy`, `Y_cl.npy`.
 
 In `train.py`, we can control training and testing length, batch size, training epochs. Use `python train.py -h` to see details. 
 
-In `back_test.py`, we can pick different saved models to load. Details see `python back_test.py -h`. 
+In `back_test.py`, we can pick different saved models to load and test different strategies. Details see `python back_test.py -h`. 
 
 ### MSE
 

@@ -36,7 +36,7 @@ parser.add_argument(
     '--loss-type',
     type=str,
     default='MSE',
-    help='loss type')
+    help='loss type, should be MSE')
 parser.add_argument(
     '--N',
     type=int,
@@ -56,7 +56,7 @@ parser.add_argument(
     '--short',
     type=str,
     default='bottom',
-    help='')
+    help='which stocks to short, either bottom or average')
 
 args = parser.parse_args()
 suffix = str(args.train_rolling_length) + '_' + str(args.test_rolling_length)
@@ -107,9 +107,11 @@ def back_test(k, score, returns):
         total_return = 0
         for j in range(k):
             total_return += weights[j] * returns[i][rank2ind[j]]
-            total_return -= weights[j] * returns[i][rank2ind[79 - j]]
-        for j in range(80):
-            total_return += 0#1.0/80.0 * returns[i][rank2ind[j]]
+            if args.short == 'bottom':
+                total_return -= weights[j] * returns[i][rank2ind[79 - j]]
+        if args.short == 'average':
+            for j in range(80):
+                total_return -= 1.0/80.0 * returns[i][rank2ind[j]]
         res.append(total_return)
         pos, neg = [], []
         r_pos, r_neg = [], []
@@ -200,19 +202,6 @@ def load_model_test_all_rank(model, model_name, test_features, test_ranks, ranks
 Model = Models[args.model_type]
 model_t = Model(n_features = args.nfeatures)
 model_t = model_t.double()
-'''
-t = []
-for ind in range(0, 7):
-    d = pd.DataFrame()
-    for itr in range(1999, 2000):
-        print(ind, itr)
-        tmp = load_model_test(model_t, 'rolling_model_' + str(ind) + '_' + str(itr) + '.json', './rolling/features_test_' + str(ind) + '.npy', './rolling/ranks_test_' + str(ind) + '.npy')
-        t.append(tmp)
-t = np.concatenate(t, axis = 0)
-d = pd.DataFrame()
-d['return'] = t
-d.to_csv('rolling_returns.csv', index = True) 
-'''
 
 def load_model_test_ranks(model, model_name, test_features, test_ranks, ranks):
     tmp = []
@@ -227,24 +216,6 @@ def load_model_test_ranks(model, model_name, test_features, test_ranks, ranks):
     res, weight_list_pos, weight_list_neg, return_list_pos, return_list_neg = back_test(ranks,y,r)
     
     return res, weight_list_pos, weight_list_neg, return_list_pos, return_list_neg
-'''
-epoch_to_use = 999
-rank_to_use = 8
-
-RP, RT = [], []
-for ind in range(0, args.N):
-    for itr in range(epoch_to_use, epoch_to_use+1):
-        print(ind, itr)
-        rp, rt = load_model_test_all_rank(model_t, './models_' + suffix + '_' + args.loss_type + '/rolling_model_' + str(ind) + '_rvs' + str(itr) + '.dat', './rolling_' + suffix + '/features_test_' + str(ind) + '.npy', './rolling_' + suffix +'/ranks_test_' + str(ind) + '.npy', rank_to_use)
-        RP.append(rp)
-        RT.append(rt)
-RP = np.concatenate(RP, axis=0)
-RT = np.concatenate(RT, axis=1)
-print('here')
-np.save('./results_' + suffix + '/results_' + args.loss_type + '_' + str(epoch_to_use) + '_' + str(rank_to_use)+'_rvs_pred.npy', RP)
-np.save('./results_' + suffix + '/results_' + args.loss_type + '_' + str(epoch_to_use) + '_' + str(rank_to_use)+'_rvs_true.npy', RT)
-'''
-
 
 
 d = pd.DataFrame()
@@ -275,5 +246,5 @@ for i in range(8):
 for i in range(8):
     d['neg_ticker_'+str(i+1)] = wn[:,i]
 d['return'] = tt
-d.to_csv('./results_' + suffix +'/results_' + args.loss_type + '_' + str(epoch_to_use) + '_' + str(rank_to_use)+f'_{args.batch_size}.csv', index = False)
+d.to_csv('./results_' + suffix +f'/results_{args.short}_' + args.loss_type + '_' + str(epoch_to_use) + '_' + str(rank_to_use)+f'_{args.batch_size}.csv', index = False)
 
