@@ -28,3 +28,7 @@ In `train.py`, we can control training and testing length, batch size, training 
 
 In `back_test.py`, we can pick different saved models to load. Details see `python back_test.py -h`. 
 
+### MSE
+
+We don't have `relu` for MSE loss, so we use `train_mlp.py` and `back_test_mlp.py`, who have slightly different network structures. 
+
